@@ -1,0 +1,21 @@
+{
+  "name": "androidtoolset",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "express": "^4.18.0",
+    "frida": "^14.2.18",
+    "frida-compile": "^10.2.4",
+    "frida-load": "^1.0.0",
+    "nunjucks": "^3.2.3"
+  },
+  "devDependencies": {},
+  "description": ""
+}
