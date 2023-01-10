@@ -4,7 +4,9 @@ const frida  = require("frida")
 const nunjucks = require('nunjucks')
 const bodyParser = require('body-parser')
 const load = require('frida-load')
+const socket_io = require('socket.io');
 const fs = require("fs");
+const moment = require('moment')
 
 
 const privacy_path = __dirname + "/log/" + "privacy.txt"
@@ -16,6 +18,8 @@ const template_path = __dirname + "/views/templates"
 const app = express()
 const server = http.createServer(app);
 
+const io = socket_io(server);
+app.set('socket_io', io);
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 app.use(express.static(static_path))
@@ -50,7 +54,6 @@ let target = null
  * 参数有模板界面form表单提供
  */
 app.post("/index", async function (req, res) {
-    res_start = res
     const target_package = req.body.package
     console.log(req.body)
     target = target_package.substring(0, target_package.indexOf("---"))
@@ -58,6 +61,8 @@ app.post("/index", async function (req, res) {
     if(type == "privacy"){
         await privacy_init()
     }
+
+    res.render("main.html", {})
 
 })
 
@@ -78,31 +83,45 @@ async function privacy_init() {
 
 }
 
-function writeFile(data) {
+function io_handler(func, data) {
+    io.emit(
+        func,
+        {
+            'data': JSON.stringify(data)
+        },
+    )
+}
+
+function writeFile(data, file_path) {
     if (!data) {
         console.log("data is null")
         return
     }
     console.log(data)
     // const currentTime = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss')
-    // const param = currentTime + '\r\n' + JSON.stringify(data) + '\r\n'
-    // fs.writeFileSync(logger_path, param, {flag: 'a'})
+    // const param = currentTime + '\r\n' + data + '\r\n'
+    // fs.writeFileSync(file_path, param, {flag: 'a'})
 }
-
 
 function onMessage(message, data) {
-    console.log(message)
-    console.log(message,data)
-    // if (!message.payload) {
-    //     console.log("---oops---")
-    //     console.log(message)
-    //     return
-    // }
+    if (!message.payload) {
+        console.log("---oops---")
+        console.log(message)
+        return
+    }
+    const func = message.payload.function
+    const value = message.payload.value
+    console.log(value)
+    switch (func){
+        case "privacy":
+            io_handler("webConsole",value)
+            break
+    }
 }
 function onProcessCrashed(crash) {
-    writeFile('[*] onProcessCrashed() crash:' + crash)
+    writeFile('[*] onProcessCrashed() crash:' + JSON.stringify(crash))
 }
 
 function onSessionDetached(reason, crash) {
-    writeFile('[*] onSessionDetached() reason:' + reason, 'crash:' + crash)
+    writeFile('[*] onSessionDetached() reason:' + reason, 'crash:' + JSON.stringify(crash))
 }

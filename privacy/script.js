@@ -1,4 +1,6 @@
 // 获取调用链
+import {send_message} from "../message_helper";
+
 function getStackTrace() {
     var Exception = Java.use("java.lang.Exception");
     var ins = Exception.$new("Exception");
@@ -20,7 +22,7 @@ function alertSend(action, messages) {
     var myDate = new Date();
     var _time = myDate.getFullYear() + "-" + myDate.getMonth() + "-" + myDate.getDate() + " " + myDate.getHours() + ":" + myDate.getMinutes() + ":" + myDate.getSeconds();
     // send({"type": "notice", "time": _time, "action": action, "messages": messages, "stacks": getStackTrace()});
-    send({"type": "notice", "time": _time, "action": action, "messages": messages ,"stacks": getStackTrace()});
+    send_message("privacy",{"type": "notice", "time": _time, "action": action, "messages": messages ,"stacks": getStackTrace()});
 
 }
 
@@ -33,6 +35,8 @@ function checkRequestPermission() {
         console.log(e)
         return
     }
+    if(ActivityCompat == null || ActivityCompat.requestPermissions == undefined)
+        return;
     ActivityCompat.requestPermissions.overload('android.app.Activity', '[Ljava.lang.String;', 'int').implementation = function (p1, p2, p3) {
         var temp = this.requestPermissions(p1, p2, p3);
         alertSend("APP申请权限", "申请权限为: " + p2);
@@ -562,7 +566,6 @@ function main() {
     try {
         Java.perform(function () {
             console.log("合规检测敏感接口开始监控...");
-            console.log({"type": "isHook"})
             var moduleList = {"type": "all", "data": []};
             // recv(function (received_json_object) {
             //     moduleList = received_json_object.use_module;
