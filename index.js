@@ -59,7 +59,12 @@ app.post("/index", async function (req, res) {
     target = target_package.substring(0, target_package.indexOf("---"))
     type = req.body.type
     if(type == "privacy"){
-        await privacy_init()
+        try{
+            await privacy_init()
+        }catch (e) {
+            console.log(e)
+        }
+
     }
 
     res.render("main.html", {})
