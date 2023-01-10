@@ -10,6 +10,8 @@ node index.js
 
 ### 安装
 
+[安装教程](doc/安装教程.md)
+
 1. 安装frida
 
 2. 启动 frida-server
